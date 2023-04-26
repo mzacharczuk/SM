@@ -1,0 +1,601 @@
+---
+title: "Statystyka Matematyczna - lista nr 1"
+author: "Milena Zacharczuk"
+date: '2023-04-19'
+output: html_document
+---
+Zadania na stronie profesora Grzegorzewskiego.
+hasło: naukaR=kariera
+
+
+## Zadanie 1.
+Utworzyć wykresy gęstości, dystrybuanty i funkcji przeżycia dla zmiennych losowych o rozkładzie normalnym z parametrami:  
+
+a) $N(0,1), N(1,1), N(2,1)$
+
+Gęstość.
+```{r 01_a_dnorm, cache =TRUE}
+curve(dnorm(x), from=-6, to=6, ylab="Gęstość")
+curve(dnorm(x,1,1), from=-6, to=6, col="red", add=T)
+curve(dnorm(x,2,1), from=-6,to=6, col="blue", add=T)
+
+legend ("topright", c("N(0,1)","N(1,1)","N(2,1)"), fill=c("black","red","blue"))
+```
+
+Dystrybuanta. 
+```{r 01_a_pnorm, cache =TRUE}
+par(mfrow=c(1,1))
+
+curve(pnorm(x),from=-6,to=6, ylab="Dystrybuanta")
+curve(pnorm(x,1,1),from=-6,to=6,col="red",add=T)
+curve(pnorm(x,2,1),from=-6,to=6,col="blue",add=T)
+
+legend ("topright", c("N(0,1)","N(1,1)","N(2,1)"), fill=c("black","red","blue"))
+```
+
+Funkcja przeżycia = prawdopodobieństwo, że zdarzenie nie zajdzie do czasu $t$.
+```{r 01_a_fp, cache =TRUE}
+par(mfrow=c(1,1))
+
+curve(pnorm(x, lower.tail = FALSE),from=-6,to=6, ylab="Funkcja przeżycia")
+curve(pnorm(x,1,1, lower.tail = FALSE),from=-6,to=6,col="red",add=T)
+curve(pnorm(x,2,1, lower.tail = FALSE),from=-6,to=6,col="blue",add=T)
+
+legend ("topright", c("N(0,1)","N(1,1)","N(2,1)"), fill=c("black","red","blue"))
+```
+
+b) $N(0,1), N(0,0.5), N(0,2)$
+```{r 01_b_dnorm, cache =TRUE}
+curve(dnorm(x,0,0.5),from=-6,to=6, ylab="Gęstość")
+curve(dnorm(x),from=-6,to=6,col="red",add=T)
+curve(dnorm(x,0,2),from=-6,to=6,col="blue",add=T)
+
+legend ("topright", c("N(0,0.5)","N(0,1)","N(0,2)"), fill=c("black","red","blue"))
+```
+
+```{r 01_b_pnorm, cache =TRUE}
+curve(pnorm(x,0,0.5),from=-6,to=6, ylab= "Dystrybuanta")
+curve(pnorm(x),from=-6,to=6,col="red",add=T)
+curve(pnorm(x,0,2),from=-6,to=6,col="blue",add=T)
+
+legend ("topright", c("N(0,0.5)","N(0,1)","N(0,2)"), fill=c("black","red","blue"))
+```
+
+```{r 01_b_fp, cache =TRUE}
+curve(pnorm(x,0,0.5, lower.tail = FALSE),from=-6,to=6, ylab= "Funkcja przeżycia")
+curve(pnorm(x, lower.tail = FALSE),from=-6,to=6,col="red",add=T)
+curve(pnorm(x,0,2, lower.tail = FALSE),from=-6,to=6,col="blue",add=T)
+
+legend ("topright", c("N(0,0.5)","N(0,1)","N(0,2)"), fill=c("black","red","blue"))
+```
+
+Fragment dystrybuanty. $95\%$ gęstości z $N(0,1)$
+```{r}
+x <- seq(qnorm(0.025), qnorm(0.975), 0.001)
+plot(x, dnorm(x), type='l', ylab="Gęstość") # gęstość
+plot(x, pnorm(x), type='l', ylab = "Dystrybuanta") # dystrybuanta
+plot(x, 1 - pnorm(x), type='l', ylab = "Funkcja przeżycia") # funkcja przeżycia
+```
+
+## Zadanie 2.
+Sprawdzić tzw. regułę $3$-sigmową dla rozkładu normalnego. Utworzyć graficzną ilustrację tej reguły. 
+
+Reguła $3$ sigm: $\mathbb{P}(\mu - 3 \sigma  \leq x  \leq \mu + 3 \sigma) = 99.73\%$  
+Rozpiszmy.
+\begin{align*}
+\mathbb{P}(\mu - 3\sigma \leq x \leq \mu + 3\sigma) 
+  &= \mathbb{P}(\mu - 3\sigma \leq x) \cdot \mathbb{P}(x \leq \mu + 3\sigma) \\
+  &= (1 - \mathbb{P}(x < \mu - 3\sigma)) \cdot \mathbb{P}(x \leq \mu + 3\sigma) \\
+  &= (1 - \Phi(\mu - 3\sigma)) \cdot \Phi(\mu + 3\sigma)
+\end{align*}
+
+```{r 3sigm, cache =TRUE}
+mu <- 0
+sigma <-1 
+(1 - pnorm(mu - 3 * sigma, mu, sigma)) * pnorm(mu + 3 * sigma, mu, sigma)
+```
+
+Druga opcja:
+```{r 3sigm_2, cache = TRUE}
+pnorm(mu - 3 * sigma, mu, sigma, lower.tail = FALSE) * pnorm(mu + 3 * sigma, mu, sigma, lower.tail = TRUE)
+```
+
+Rozkład normalny jest symetryczny, tzn. $1- F_N(\mu - x) = F_N(\mu + x), x > 0$.
+```{r N_symetryczny, cache = TRUE}
+1 - pnorm(mu - 0.375, mu)
+pnorm(mu + 0.375, mu)
+```
+
+Stąd:
+```{r 3sigm_3, cache = TRUE}
+pnorm(mu + 3 * sigma, mu, sigma) ^ 2
+```
+
+Rysunek
+```{r}
+x <- seq(-5,5,0.01)
+y <- dnorm(x)
+ 
+plot(x, y, type="l", main="Regula 3-sigmowa", xlab="", ylab=NA)
+wx<-c(-3,x[x>=-3 & x<=3],3)
+wy<-c(0,y[x>=-3 & x<=3],0)
+polygon(wx,wy,col="maroon1")
+
+arrows(-3,0.01,3,0.01,code=3,length=0.1) #strzałki
+text(0,0.03,expression(paste(mu," +/- ",3,sigma)))
+
+napis<-paste(round(100*(pnorm(3)-pnorm(-3)),2),"%",sep="") #w procentach
+text(0,0.15,napis) #napis na obrazku
+```
+
+Zaznaczmy prawdopodobieństwo, że $X < -1$.
+```{r cache=TRUE}
+x <- seq(-5,5,0.01)
+y <- dnorm(x)
+plot(x, y, type="l",xaxp=c(-4,4,8),yaxp=c(0,0.5,10))
+polygon(c(x[x<=-1],-1), c(y[x<=-1],0) , col="red")
+text(-1.6, 0.03,round(pnorm(-1),4))
+```
+
+
+
+## Zadanie 3.
+Wzrost pewnej grupy osób opisany jest rozkładem normalnym o wartości oczekiwanej $173$ cm i odchyleniu standardowym $6$ cm. 
+
+a) Jakie jest prawdopodobieństwo, że losowo wybrana osoba ma nie więcej niż $179$ cm wzrostu?
+$\mathbb{P} (X \leq 179), \ X~ \sim N(173,6)$
+```{r}
+pnorm(179, 173, 6)
+```
+
+b) Jaka jest frakcja osób mających wzrost pomiędzy $167$ i $180$ cm?
+$\mathbb{P}(167 \leq X \leq 180)$
+```{r}
+pnorm(180, 173, 6) - pnorm(167, 173, 6)
+```
+
+c) Jakie jest prawdopodobieństwo, że losowo wybrana osoba ma więcej niż $181$ cm wzrostu?
+$\mathbb{P}(X>181)$
+```{r}
+pnorm(181,173,6, lower.tail = F)
+#lub 
+1 - pnorm(181,173,6)
+```
+
+d) Wyznaczyć wartość wzrostu, której nie przekracza $60\%$ badanej populacji osób.
+```{r}
+qnorm(0.6, mean = 173, sd = 6)
+```
+
+## Zadanie 4.
+Wyznaczyć wartości następujących kwantyli:  
+
+a) kwantyl rzędu $0,95$ rozkładu standardowego normalnego 
+```{r}
+qnorm(0.95)
+```
+
+b) kwantyl rzędu $0,975$ rozkładu standardowego normalnego 
+```{r}
+qnorm(0.975)
+```
+
+Albo jednocześnie.
+```{r}
+qnorm(c(0.05,0.95,0.975),0,1)
+```
+
+
+c) kwantyl rzędu $0,95$ rozkładu t-Studenta o $10$ stopniach swobody 
+```{r}
+qt(0.95,10)
+```
+
+d) kwantyl rzędu $0,99$ rozkładu t-Studenta o $20$ stopniach swobody 
+```{r}
+qt(0.99, 20)
+```
+
+e) kwantyl rzędu $0,9$ rozkładu chi-kwadrat o $4$ stopniach swobody 
+```{r}
+qchisq(0.9, 4)
+```
+
+f) kwantyl rzędu $0,95$ rozkładu chi-kwadrat o $10$ stopniach swobody 
+```{r}
+qchisq(0.95, 10)
+```
+```{r}
+qchisq(c(0.9,0.95), c(4,10))
+```
+
+g) kwantyl rzędu $0,95$ rozkładu F-Snedecora o $(2, 10)$ stopniach swobody
+```{r}
+qf(0.95, 2, 10)
+```
+
+h) kwantyl rzędu $0,99$ rozkładu F-Snedecora o $(3, 18)$ stopniach swobody. 
+```{r}
+qf(0.99, 3, 18)
+```
+
+## Zadanie 5.
+Utworzyć wykresy gęstości zmiennych losowych o rozkładzie gamma z parametrami:
+a) $\Gamma(1,1), \  \Gamma(0.5,1), \  \Gamma(2,1), \ \Gamma(3,1)$
+```{r}
+curve(dgamma(x,1,1),0,10,lty=1)
+curve(dgamma(x,0.5,1),0,10, add=T, col = "blue")
+curve(dgamma(x,2,1),0,10, add=T, col = "red")
+curve(dgamma(x,3,1),0,10, add=T, col = "orange")
+
+legend("topright", c( 
+  expression(paste(Gamma, '(', 1, ', ', 1, ')  ', sep='')), # Expression pozwala na używanie greckich liter
+  expression(paste(Gamma, '(', 0.5, ', ', 1, ')  ', sep='')), # Paste łączy stringi wstawiając znak pomiędzy
+  expression(paste(Gamma, '(', 2, ', ', 1, ')  ', sep='')),
+  expression(paste(Gamma, '(', 3, ', ', 1, ')  ', sep=''))
+), col=c('black', 'blue', 'red', 'orange'), lty=1, lwd=2) # Nie zapomnieć o lty (!), bo nie pokażą się linie.
+
+```
+  
+Pierwszy parametr - parametr kształtu. 
+
+$\Gamma(1,1) \equiv Exp(1)$  
+Ogólnie: $\Gamma(1,\lambda) \equiv Exp(\lambda)$
+```{r}
+curve(dgamma(x,1,1),0,10,col="red",lty=2)
+curve(dexp(x,1),0,10,add=T) 
+```
+
+b) $\Gamma(2,1), \ \Gamma(2,2), \ \Gamma(2,3)$
+```{r}
+curve(dgamma(x,2,3),0,10, col = "red")
+curve(dgamma(x,2,2),0,10, add=T, col = "blue")
+curve(dgamma(x,2,1),0,10, add=T, lty=1)
+
+
+
+legend("topright", c( 
+  expression(paste(Gamma, '(', 2, ', ', 1, ')  ', sep='')), 
+  expression(paste(Gamma, '(', 2, ', ', 2, ')  ', sep='')), 
+  expression(paste(Gamma, '(', 2, ', ', 3, ')  ', sep=''))
+), col=c('black', 'blue', 'red'), lty=1, lwd=2) 
+
+```
+  
+Drugi parametr - parametr skali.
+
+## Zadanie 6.
+a) Utworzyć wykresy gęstości zmiennych losowych o rozkładzie chi-kwadrat o $5$, $10$ oraz $40$ stopniach swobody. 
+Przeanalizować, jak zmienia się gęstość rozkładu chi-kwadrat wraz ze wzrostem liczby stopni swobody. 
+
+$\chi^2 = \sum_{i=1} ^n x_i^2,$ gdzie $x_i \sim N(0,1)$
+
+Zależnosci między rozkładami:  
+1. $\chi_n \equiv \Gamma(\frac{n}{2}, \frac{1}{2})$  
+2. dla dużych n: $\chi_n$ to z grubsza $N(n,\sqrt{2n})$; konwencja: $\sigma =  \sqrt{2n}$
+
+
+```{r 06_a, cache = TRUE}
+curve(dchisq(x,5),0,50)
+curve(dchisq(x,10),0,50,add=T,col="red")
+curve(dchisq(x,40),0,50,add=T,col="blue")
+```
+
+b) Przeprowadzić eksperyment symulacyjny pokazujący, że rozkład chi-kwadrat wraz ze wzrostem liczby stopni swobody zbiega do rozkładu normalnego. 
+
+```{r 06_b, cache = TRUE}
+curve(dchisq(x, 5), from=0, to=150, ylab="y")
+curve(dnorm(x, 5, sqrt(2*5)), from=0, to=150, col="violet",add=T)
+
+curve(dchisq(x, 10), from=0, to=150, col="red", add=T)
+curve(dnorm(x, 10, sqrt(2*10)), from=0, to=150, col="violet",add=T)
+
+curve(dchisq(x, 40), from=0, to=150, col="blue", add=T)
+curve(dnorm(x, 40, sqrt(2*40)), from=0, to=150, col="violet", add=T)
+
+curve(dchisq(x, 100), from=0, to=150, col="green", add=T)
+curve(dnorm(x, 100, sqrt(2*100)), from=0, to=150, col="violet", add=T)
+
+curve(dchisq(x, 1000), from=0, to=2000)
+curve(dnorm(x, 1000, sqrt(2*1000)), from=0, to=2000, col="violet", add=T)
+```
+
+```{r cache=TRUE}
+x = seq(1, 90, 0.1)
+n_iter = 60
+plot(x, dchisq(x, 1), type='l', col='gray')
+lines(x, dnorm(x, n_iter, sqrt(2 * n_iter)), col='darkorange', lwd=2)
+for (i in 2:n_iter) {
+  lines(x, dchisq(x, i), col='gray')
+}
+```
+
+## Zadanie 7.
+Utworzyć wykresy gęstości zmiennych losowych o rozkładzie t-Studenta z $1$, $5$ i $30$ stopniami swobody. Porównać otrzymane wykresy z wykresem gęstości zmiennej losowej o rozkładzie normalnym.
+
+```{r 07, cache=TRUE}
+#N(0,1)
+curve(dnorm(x),from=-6,to=6)
+#t(1)
+curve(dt(x,1),from=-6,to=6,col="blue",add=T)
+#t(5)
+curve(dt(x,5),from=-6,to=6,col="red",add=T)
+#t(30)
+curve(dt(x,30),from=-6,to=6,col="green",add=T)
+
+
+```
+  
+Dla rozkładu t-studenta zbieżność do rozładu normalnego zachodzi szybciej niż dla $\chi^2$.
+
+## Zadanie 8.
+Utworzyć wykresy gęstości zmiennych losowych o rozkładzie F-Snedecora: 
+
+```{r 08_a, cache=TRUE}
+curve(df(x,10,20),from=0,to=4, ylab="")
+curve(df(x,10,10),from=0,to=4,col="red",add=T)
+curve(df(x,10,5),from=0,to=4,col="blue",add=T)
+```
+
+```{r 08_b, cache=TRUE}
+curve(df(x,2,2),from=0,to=4, ylab="")
+curve(df(x,3,2),from=0,to=4,col="red",add=T)
+curve(df(x,5,2),from=0,to=4,col="blue",add=T)
+```
+
+Jeśli pierwszy parameter jest większy niż $2$ to mamy rozkład modalny; im wyższy drugi parametr tym większa górka.
+
+```{r 08_c, cache = TRUE}
+curve(dexp(x),0,4, lwd=2)
+curve(df(x,2,1),0,6, col="orange", add=T) 
+curve(df(x,2,5),0,6, col="blue", add=T) 
+curve(df(x,2,10),0,6, col="green", add=T) 
+curve(df(x,2,20),0,6, col="red", add=T) 
+
+#f(d1,d2) -> d2X -> chi_d1
+```
+
+## Zadanie 9. 
+Utworzyć wykresy gęstości zmiennych losowych o rozkładach $Beta(1,1), \ Beta(2, 2), \ Beta(5, 2)$ i $Beta(2,5)$. Sformułować wnioski dotyczące wpływu obu parametrów rozkładu na kształt wykresu gęstości.
+
+```{r 09, cache = TRUE}
+curve(dbeta(x,5,2),from=0,to=1, ylab="")
+curve(dbeta(x,2,2),from=0,to=1,col="red",add=T)
+curve(dbeta(x,1,1),from=0,to=1,col="blue",add=T)
+curve(dbeta(x,2,5),from=0,to=1,col="green",add=T)
+```
+  
+Dodatkowe wykresy
+```{r 09_d1, cache = TRUE}
+curve(dbeta(x,2,5),from=0,to=1, ylab="")
+curve(dbeta(x,2,4),from=0,to=1,col="red",add=T)
+curve(dbeta(x,2,3),from=0,to=1,col="blue",add=T)
+curve(dbeta(x,2,2),from=0,to=1,col="green",add=T)
+```
+
+```{r 09_d2, cache = TRUE}
+curve(dbeta(x,5,2),from=0,to=1, ylab= "")
+curve(dbeta(x,4,2),from=0,to=1,col="red",add=T)
+curve(dbeta(x,3,2),from=0,to=1,col="blue",add=T)
+curve(dbeta(x,2,2),from=0,to=1,col="green",add=T)
+```
+
+Oba parametru to parametry kształtu.
+
+## Zadanie 10.
+Sporządzić wykres funkcji masy prawdopodobieństwa rozkładów: $Bin(10,0.5), \ Bin(10,0.25), \ Bin(50,0.25)$.  
+
+Przedstawimy to formie kubełków - parametr $h.$
+```{r}
+plot(0:10, dbinom(0:10, 10, 0.5), type='h', lwd=6, col='purple', xlab='x')
+plot(0:10, dbinom(0:10, 10, 0.25), type='h', lwd=6, col='purple', xlab='x')
+plot(0:100, dbinom(0:100, 100, 0.25), type='h', lwd=2, col='purple', xlab='x')
+
+```
+
+Alternatywnie przy użyciu barplotu.
+```{r}
+n <- 50
+p <- 0.25
+k <- 0:n
+pk <- dbinom(k,n,p)
+
+barplot(pk,names=k)
+```
+
+Jeżeli $np$  i $n(1-p)$ są większe od $5$, to rozkład dwumianowy można przybliżać rozkładem normalnym $N(np, \sqrt{np(1-p)})$.
+```{r}
+#zmienne do rozkładu dwumianowego
+n <- 50
+p <- 0.25
+xk <- seq(0,n,1)
+pk <- dbinom(xk,n,p)
+
+#zmienne do rozkładu normalnego
+x <- seq(0,n,0.01)
+mu <- n*p
+sigma <- sqrt(n*p*(1-p))
+y <- dnorm(x, mu, sigma) 
+
+plot(xk, pk, type="h")
+lines(x, y, type="l",col="red") #normalny
+```
+
+## Zadanie 11.
+Średnio jedna na dziesięć osób mijających pewien sklep wchodzi do tego sklepu. Niech $X$ oznacza numer pierwszej osoby, która weszła do sklepu, podczas gdy $X-1$ osób, które wcześniej mijały ów sklep, nie weszło do środka.   
+
+Obliczyć prawdopodobieństwo tego, że: $X = 1, \ X = 2, \ X = 3, \ X = 4$ oraz tego,  że $X>11$.  
+
+
+$\to$ rozkład geometryczny (sukces poprzedziło k-porażek)  
+\begin{align*}
+\mathbb{P}(Y=k) = p(1-p)^k, \quad k=0,1,\dots
+\end{align*}
+```{r}
+# X = 1 => Y = liczba porażek = 0
+pgeom(0, 0.1)
+# X = 2 => Y = liczba porażek = 1
+pgeom(1, 0.1) - pgeom(0, 0.1)
+# X = 3 => Y = liczba porażek = 2 
+pgeom(2, 0.1) - pgeom(1,0.1)
+
+plot(0:100, dgeom(0:100, 0.1), type='h', lwd=2, col='purple', xlab='x')
+plot(0:100, pgeom(0:100, 0.1), type='h', lwd=2, col='purple', xlab='x')
+```
+
+$X$ - sukces; liczba sukcesów ma być większa niż $11$, więc liczba porażek będzie równa co najmniej $11$.
+$\mathbb{P}(Y \geq 11) = 1- \mathbb{P}(Y < 11) = 1- \mathbb{P}(Y \leq  10)$
+```{r cache = TRUE}
+1-pgeom(10, prob = 0.1) 
+pgeom(10, 0.1, lower.tail = F)
+
+```
+## Zadanie 12.
+W partii towaru liczącej $200$ sztuk znajduje się $5$ sztuk niespełnijących wymagań jakościowych. Jakie jest prawdopodobieństwo, że w losowej próbie $10$ sztuk pobranych z tej partii nie znajdzie się ani jedna sztuka wadliwa? 
+
+
+$\to$ rozkład hipergeometryczny:  
+W populacji o $N$ ($200$) elementach jest $M$ ($5$) elementów wyróżnionych  
+$\mathbb{P}(X=k) = \mathbb{P}$(w próbce $n$-elementowej jest $m$ elementów  wyróżnionych)  
+dhyper(m, M, N-M, n)
+
+   1. Ile jest kul białych?       $M = 5$ (towar wadliwy)
+   2. Ile jest kul czarnych?      $N-M = 195$ (towar dobry)
+   3. Ile kul losujemy?           $n= 10$
+   4. Ile kul białych wylosujemy z urny zawierającej białe i czarne kule? $m= 0$ (ani jedna sztuka wadliwa w wylosowanej próbce)
+   
+```{r 12, cache= TRUE}
+
+
+m <- 0
+n <- 10  
+N <- 200
+M <- 5
+dhyper(m, M, N-M, n) 
+```
+Ręczne sprawdzenie.
+```{r}
+choose(M,m)*choose(N-M,n-m)/choose(N,n)
+```
+
+
+## Zadanie 13.
+Czas poprawnej pracy aparatu telefonicznego ma rozkład wykładniczy o intensywności awarii $0,0001$ [1/h].  
+
+a) Obliczyć prawdopodobieństwo, że aparat ten nie uszkodzi się w ciągu: $1000, 10000, 30000$ godzin pracy. 
+$\mathbb{P}(X\leq t)$ oznacza, że awaria wystąpiła w przedziale $[0,t]$
+```{r}
+p <- 0.0001
+
+1-pexp(1000,p) #funkcja przezycia
+
+1-pexp(10000,p)
+
+1-pexp(30000,p)
+```
+
+b) Ile godzin powinien przepracować bezawaryjnie ten aparat z prawdopodobieństwem 0,9? 
+```{r}
+a <- 0.0001
+alpha <- 0.1
+qexp(alpha,a) #kwantyl rzedu alfa
+
+curve(pexp(x, 0.0001), 0, 50000, xlab='Czas pracy', ylab='P-stwo zepsucia', main='Działanie aparatu')
+abline(v=qexp(alpha,a), col="red")
+
+qexp(0.9, 0.0001) # Czas, w którego momencie wiemy, że pstwo wystąpienia awarii wcześniej wynosi 90%.
+qexp(0.9, 0.0001, lower.tail = F) # Czas, w którego momencie wiemy, że pstwo braku wystąpienia awarii wcześniej wynosi 90%.
+qexp(0.1, 0.0001)
+
+```
+
+## Zadanie 14.
+Z dotychczasowych obserwacji wynika, że liczba klientów w ciągu godziny do oddziału banku ma rozkład Poissona o średniej $4$ (klientów na godzinę).
+
+$\mathbb{E}X = \lambda = 4$, częstotliwość pojawiania się klientów.  
+Na wykresie widać rozkład p-stwa, że w ciągu interwału czasowego, którego dotyczy częstotliwość, pojawi się $k$ klientów.  
+
+$\mathbb{P}(X=k)$ dla $X$ o rozkładzie Poissona z parametrem $a$: $dpois(k,a)$. 
+
+```{r}
+#prawdopodobieństwo, że pojawi się 3 klientów w ciągu godziny
+dpois(3, 4) 
+```
+
+
+```{r}
+plot(0:100, dpois(0:100, 4), type='h', lwd=2, col='darkorange', xlab='k') 
+```
+
+a) Jaki jest rozkład prawdopodobieństwa czasu między przyjściem kolejnych klientów?  
+$\to$ rozkład wykładniczy.  
+
+$Y\sim Exp(\lambda)$, gdzie $\lambda=4$
+```{r}
+lambda <- 4
+curve(dexp(x,lambda),0,10)
+```
+
+b) Jaki jest średni czas oraz odchylenie standardowe czasu pomiędzy chwilami przybycia kolejnych klientów?  
+Rozkład wykładniczy: $X \sim EXP(\lambda)$, to $\mathbb{E}[X] =  \frac{1}{\lambda}$ oraz $Var(X) = \frac{1}{\lambda^2}.$
+
+```{r}
+#EX = 1 / lambda
+1/lambda
+
+#Var(X) = 1 / lambda^2
+1/lambda^2
+
+#sprawdzenie
+mean(rexp(1000, lambda))
+sd(rexp(1000, lambda))
+```
+
+c) Jeżeli w danej chwili do oddziału wszedł klient, to jakie jest prawdopodobieństwo, że w ciągu najbliższych $30$ minut kolejny klient przybędzie do oddziału? 
+```{r}
+pexp(0.5, lambda)
+```
+
+d) Jakie jest prawdopodobieństwo, że w ciągu godziny do oddziału banku nie przyjdzie ani jeden klient? 
+1. Liczba klientów w ciągu godziny do oddziału banku ma rozkład Poissona o średniej $4$ (klientów na godzinę).  
+2. Rozkład prawdopodobieństwa czasu między przyjściem kolejnych klientów to rozkład wykładniczy.
+```{r}
+dpois(0, lambda)
+1 - pexp(1, lambda)
+```
+
+## Zadanie 15.
+Posługując się metodą Monte Carlo obliczyć pola powierzchni następujących obszarów:  
+
+a) $0 < x < 1, \quad 0 < y < x^2$ 
+```{r cache= TRUE}
+n <- 1000
+X <- runif(n, 0, 1)
+Y <- runif(n, 0, 1)
+
+plot(X, Y, pch=16, col='lightgray')
+curve(x * x, 0, 1, col='darkorange', lwd=2, add=T)
+points(X[X * X > Y], Y[X * X > Y], col='darkorange')
+
+mean(ifelse(Y < X*X, 1, 0)) # Szukane pole
+
+```
+Alternatywnie:
+```{r}
+g <- function(x) {x^2}
+integrate(g, lower = 0, upper =1)
+```
+b) $x^2 < y <1-x^2$
+```{r}
+n <- 1000
+X <- runif(n, 0, 1)
+Y <- runif(n, 0, 1)
+plot(X, Y, pch=16, col='lightgray')
+curve(x * x, 0, 1, col='darkorange', lwd=2, add=T)
+curve(1 - x * x, 0, 1, col='darkorange', lwd=2, add=T)
+points(X[(X * X < Y) & (Y < 1 - X * X)], Y[(X * X < Y) & (Y < 1 - X * X)], col='darkorange')
+
+mean(ifelse((X * X < Y) & (Y < 1 - X * X), 1, 0)) # Szukane pole
+```
+
+
